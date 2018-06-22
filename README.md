@@ -1,2 +1,2 @@
 # 1_plus_1-ES
-ES use GP
+Use GP in 1+1 ES
