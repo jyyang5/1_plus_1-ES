@@ -42,7 +42,7 @@ function withGP_Strategy(f,x0,sigma0,NUM_OF_ITERATIONS)%, OPTIMAL, TARGET_DISTAN
 
 
 
-    while(t < NUM_OF_ITERATIONS && f(x_array(:,T))>10^(-8))%(norm(x_array(:,T)-OPTIMAL(:,1)) > TARGET_DISTANCE))
+    while(t < NUM_OF_ITERATIONS && f(x_array(:,T))>10^(-7))%(norm(x_array(:,T)-OPTIMAL(:,1)) > TARGET_DISTANCE))
 
         % offspring_generation
         %temp = randn(n,1);
@@ -172,8 +172,8 @@ function val = gp_strategy(x, f_x, y, xTrain, fTrain, T, sigma, n)
 
         
     direct = sigma*randn(n,1);
-    theta = sigma*8*sqrt(n);    % NOtE: need to be updated every time
-
+    %theta = sigma*8*sqrt(n);    % NOtE: need to be updated every time
+    theta = sigma*8*n;
     y_plus = x + direct;        % offspring with possitive direction
     y_minus = x - direct;       % offspring with negative direction
     fy_plus_ep = gp(xTrain(:, T-40:T-1), fTrain(T-40:T-1), y_plus, theta);      % fitness of + offspring(use GP) 
@@ -193,15 +193,28 @@ function val = gp_strategy(x, f_x, y, xTrain, fTrain, T, sigma, n)
         %disp(val);
         %disp(val(1));
         %disp(val(2));
-    % problem -> can be a signle line if fy_plus_ep ~= fy_minus_ep = 0
+        
+    % FIXME: can be a linear if fy_plus_ep ~= fy_minus_ep = 0
     else                                                                   % sample another offspring 
-        % another problem: resample gp evaluation be singular
-        if(para(1) >= 0.5)
+        % FIXME: resample gp evaluation is singular
+        if(para(1) >= 0.01)
+            % bad offspring -> decrease mutation strength
+            sigma = sigma * exp(-0.2/sqrt(n+1));
             val = gp_strategy(x, f_x, y, xTrain, fTrain, T, sigma, n);   
-        else % lose precision
-            val = fy_plus_ep;
-            y = y_plus;
+        % lose precision
+        else 
+            val = {y_plus,fy_plus_ep}; 
+           
         end
     end
 
 end 
+
+
+
+
+
+
+
+
+
