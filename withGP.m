@@ -1,12 +1,10 @@
 
-function withGP(f,x0,sigma0,NUM_OF_ITERATIONS, OPTIMAL, TARGET_DISTANCE)
+function withGP(f,x0,sigma0,NUM_OF_ITERATIONS)%, OPTIMAL, TARGET_DISTANCE)
 % initialization
 % f:                  objective function value
 % x0:                 initial point
 % sigma0:             initial muttaion strength
 % NUM_OF_ITERATIONS:  number of maximum iterations
-% OPTIMAL:            global optima
-% TARGET_DISTANCE:    target distance to global optima
 
 % initialization
 [n,m] = size(x0)                         % dim of the data
