@@ -1,4 +1,5 @@
-function noGP(f,x0,sigma0,NUM_OF_ITERATIONS, OPTIMAL, TARGET_DISTANCE)
+
+function val = noGP(f,x0,sigma0,NUM_OF_ITERATIONS, OPTIMAL, TARGET_DISTANCE)
 % initialization
 % f:                  objective function value
 % x0:                 initial point
@@ -6,6 +7,8 @@ function noGP(f,x0,sigma0,NUM_OF_ITERATIONS, OPTIMAL, TARGET_DISTANCE)
 % NUM_OF_ITERATIONS:  number of maximum iterations
 % OPTIMAL:            global optima
 % TARGET_DISTANCE:    target distance to global optima
+
+
 
 % example input:      fun = @(x) x' * x
 %                     noGP(fun, randn(10,1)*100,5,500,zeros(10,1),exp(-7)) 
@@ -49,6 +52,7 @@ while((t < NUM_OF_ITERATIONS) && (norm(x(:,t)-OPTIMAL(:,1)) > TARGET_DISTANCE))
     
 end 
     
+val = cell(t,sigma,f_x);
 
 % final evaluated value 
 disp('Last iteration output');
