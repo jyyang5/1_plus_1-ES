@@ -47,22 +47,13 @@ while(t < NUM_OF_ITERATIONS && f(x_array(:,T))>10^(-8))%(norm(x_array(:,T)-OPTIM
 
     % offspring_generation
     %temp = randn(n,1);
-    direct = sigma*randn(n,1);
-    y_plus = x + direct;%temp;
+    
 
     % update GP iff. there is 40 candiate solutions
     if T > 40
-        theta = sigma*8*sqrt(n); % NOtE: need to be updated every time
-        fy_plus_ep = gp(xTrain(:, T-40:T-1), fTrain(T-40:T-1), y, theta);      % fitness of + offspring(use GP)
-        y_minus = x - direct;%opposite direction;
-        fy_minus_ep = gp(xTrain(:, T-40:T-1), fTrain(T-40:T-1), y, theta);     % fitness of - offspring(use GP)
-        % fit a qudratic model using x, y_plus, y_minus
-        input = [y_plus, y_minus, x];
-        output = [fy_plus_ep, fy_minus_ep,f_x(T)];          
-        para = polyfit(input, output, 2);                                      % parameters for the quadratic model  
-        w_min = -para(2)/2/para(1);
-        y_new = x + w_min*direct/sigma;
-        fy_new_ep = gp(xTrain(:, T-40:T-1), fTrain(T-40:T-1), y_new, theta)    % evaluate the best offspring in that dim use GP
+        fy_ep =0;
+        y = 0;
+        fy_ep = gp_strategy(x, f_x, y, xTrain, fTrain, T, sigma);
         
         if(fy_new_ep < f_x(T))                                                 % good offspring
             y = y_plus;
@@ -70,12 +61,12 @@ while(t < NUM_OF_ITERATIONS && f(x_array(:,T))>10^(-8))%(norm(x_array(:,T)-OPTIM
         else                                                                   % sample another offspring 
             
             
+        end
         
         
+    else % simple 1+1 ES
         
-    else 
-        y = y_plus;
-        fy_ep = fy_plus_ep;
+        y = x +sigma*randn(n,1);
     end
    
     % update mutation & assign new offspring
@@ -184,4 +175,34 @@ fTest = mu + Ks'*Kinv*(fTrain - mu)';
 
 end
 
-function val = offspring_generation(x,f_x,y)
+
+
+function val = gp_strategy(x, f_x, y, xTrain, fTrain, T, sigma)
+
+        
+direct = sigma*randn(n,1);
+theta = sigma*8*sqrt(n);    % NOtE: need to be updated every time
+
+y_plus = x + direct;        % offspring with possitive direction
+y_minus = x - direct;       % offspring with negative direction
+fy_plus_ep = gp(xTrain(:, T-40:T-1), fTrain(T-40:T-1), y_plus, theta);      % fitness of + offspring(use GP) 
+fy_minus_ep = gp(xTrain(:, T-40:T-1), fTrain(T-40:T-1), y_minus, theta);     % fitness of - offspring(use GP)
+        
+% fit a quadratic model using x, y_plus, y_minus
+input = [y_plus, y_minus, x];
+output = [fy_plus_ep, fy_minus_ep,f_x(T)];          
+para = polyfit(input, output, 2);                                      % parameters of the quadratic model  
+w_min = -para(2)/2/para(1);                                            % variable corespond to the mean of the model
+y_new = x + w_min*direct/sigma;                                        
+fy_new_ep = gp(xTrain(:, T-40:T-1), fTrain(T-40:T-1), y_new, theta);   % evaluate the best offspring in that dim use GP
+        
+ if(fy_new_ep < f_x(T))                                                 % good offspring
+    y = y_new;
+    val = fy_new_ep;
+ else                                                                   % sample another offspring 
+    val = gp_strategy(x,f_x,y,fTrain,T,sigma);
+        
+            
+end
+
+end 
